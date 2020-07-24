@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from datetime import datetime
 
 from django.conf import settings
 from django.contrib import messages
@@ -11,6 +12,7 @@ from django.utils.translation import gettext as _
 
 from evap.evaluation.auth import participant_required
 from evap.evaluation.models import Evaluation, Course, NO_ANSWER, Semester
+from evap.evaluation.tools import date_to_datetime
 
 from evap.student.forms import QuestionnaireVotingForm
 from evap.student.tools import question_id
@@ -48,15 +50,29 @@ def index(request):
     semester_list = [dict(
         semester_name=semester.name,
         id=semester.id,
-        is_active=semester.is_active,
         results_are_archived=semester.results_are_archived,
         grade_documents_are_deleted=semester.grade_documents_are_deleted,
         evaluations=[evaluation for evaluation in evaluations if evaluation.course.semester_id == semester.id]
     ) for semester in semesters]
 
+    unfinished_evaluations = list(Evaluation.objects.filter(participants=request.user, state__in=['prepared', 'editor_approved', 'approved', 'in_evaluation']).exclude(voters=request.user))
+
+    # available evaluations come first, ordered by time left for evaluation and the name
+    # evaluations in other (visible) states follow by name
+    def sorter(evaluation):
+        return (
+            evaluation.state != 'in_evaluation',
+            evaluation.state not in ['prepared', 'editor_approved', 'approved'],
+            date_to_datetime(evaluation.vote_end_date) - datetime.now() if evaluation.state == 'in_evaluation' else evaluation.full_name,
+            evaluation.full_name
+        )
+    unfinished_evaluations.sort(key=sorter)
+
     template_data = dict(
         semester_list=semester_list,
         can_download_grades=request.user.can_download_grades,
+        unfinished_evaluations=unfinished_evaluations,
+        evaluation_end_warning_period=settings.EVALUATION_END_WARNING_PERIOD,
     )
 
     return render(request, "student_index.html", template_data)
