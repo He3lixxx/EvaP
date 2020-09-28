@@ -15,13 +15,19 @@
             </div>
             <div class="card-body table-responsive">
                 <table class="table table-seamless-links table-vertically-aligned table-headerless">
+                    <colgroup>
+                        <col />
+                        <col style="width: 60%" />
+                        <col style="width: 20%" />
+                        <col style="width: 20%" />
+                    </colgroup>
                     <tbody>
                         {% regroup semester.evaluations by course as course_evaluations %}
                         {% for course, evaluations in course_evaluations|dictsort:"grouper.name" %}
                             {% if course.evaluation_count > 1 %}
                                 <tr class="course-row heading-row">
                                     <td></td>
-                                    <td style="width: 60%">
+                                    <td>
                                         <div class="d-flex">
                                             <span class="font-weight-bold mr-auto">
                                                 {{ course.name }}
@@ -44,8 +50,8 @@
                                         <span class="badge badge-secondary">{{ course.type }}</span>
                                         <i class="small">{{ course.responsibles_names }}</i>
                                     </td>
-                                    <td style="width: 20%"></td>
-                                    <td style="width: 20%">
+                                    <td></td>
+                                    <td>
                                         {% if semester.results_are_archived %}
                                         {% elif course.not_all_evaluations_are_published %}
                                             <div class="d-flex" data-toggle="tooltip" data-placement="left" title="{% trans 'The total grade will be calculated once all evaluation results have been published.' %}">
@@ -83,7 +89,7 @@
                                             {% endif %}
                                         {% endif %}
                                     </td>
-                                    <td {% if course.evaluation_count > 1 %}class="pl-4" {% endif %}style="width: 60%">
+                                    <td {% if course.evaluation_count > 1 %}class="pl-4" {% endif %}>
                                         <div class="d-flex">
                                             <span class="font-weight-bold mr-auto{% if course.evaluation_count > 1 %} text-secondary{% endif %}">
                                                 {% if course.evaluation_count > 1 %}
@@ -129,7 +135,7 @@
                                             <i class="small">{{ course.responsibles_names }}</i>
                                         {% endif %}
                                     </td>
-                                    <td style="width: 20%">
+                                    <td>
                                         {% if not semester.results_are_archived %}
                                             {% if evaluation.is_single_result %}
                                                 {% if evaluation.state == 'published' %}
@@ -146,7 +152,7 @@
                                             {% endif %}
                                         {% endif %}
                                     </td>
-                                    <td class="text-right" style="width: 20%">
+                                    <td class="text-right">
                                         {% if not semester.results_are_archived %}
                                             {% if evaluation.state == 'published' %}
                                                 {% include 'evaluation_result_widget.html' with course_or_evaluation=evaluation %}

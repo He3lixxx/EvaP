@@ -70,8 +70,7 @@ def index(request):
     def sorter(evaluation):
         return (
             evaluation.state != 'in_evaluation',
-            evaluation.state not in ['prepared', 'editor_approved', 'approved'],
-            date_to_datetime(evaluation.vote_end_date) - datetime.now() if evaluation.state == 'in_evaluation' else evaluation.full_name,
+            evaluation.vote_end_date if evaluation.state == 'in_evaluation' else None,
             evaluation.full_name
         )
     unfinished_evaluations.sort(key=sorter)
